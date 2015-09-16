@@ -20,21 +20,21 @@ int main(int argc, char *argv[])
     for (int i = 0; i < count; i++) {
         printf("%s has %d years lived.\n", *(names+i), ages[i]);
     }
-    Trace();
 
     int *curAge = ages;
     char **curName = names;
 
+    Trace();
     for (int i = 0; i < count; i++) {
         printf("%s is %d years old.\n", *(curName + i), *(curAge + i));
     }
-    Trace();
 
+    Trace();
     for (int i = 0; i < count; i++) {
         printf("%s is %d years old again.\n", i[curName], curAge[i]);
     }
-    Trace();
 
+    Trace();
     for (curAge = ages, curName = names; (curAge - ages) < count; curAge++, curName++) {
         printf("%s lived %d years so far.\n", *curName, *curAge);
     }
