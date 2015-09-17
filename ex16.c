@@ -42,7 +42,6 @@ void printPerson(struct Person *who)
 int main()
 {
     struct Person *joe = createPerson("Joe Alex", 32, 64, 140);
-
     struct Person *jack = createPerson("Jack Blank", 20, 72, 180);
 
     printf("Joe is at memory location %p\n", joe);
@@ -50,6 +49,7 @@ int main()
 
     printf("Jack is at memory location %p\n", jack);
     printPerson(jack);
+    //printPerson(NULL);
 
     //Make everyone age 20 years.
     joe->Age += 20;
@@ -75,6 +75,7 @@ int main()
 
     destroyPerson(joe);
     destroyPerson(jack);
+    //destroyPerson(NULL);
 
     return 0;
 }
