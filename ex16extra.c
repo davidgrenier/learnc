@@ -20,11 +20,8 @@ void printPerson(struct Person who)
 
 int main()
 {
-    struct Person joe;
-    joe.Name = "Joe Alex";
-    joe.Age = 32;
-    joe.Height = 64;
-    joe.Weight = 140;
+    struct Person joe = { .Name = "Joe Alex", .Age = 32, .Height = 64, .Weight = 140 };
+    
     struct Person jack;
     jack.Name = "Jack Blank";
     jack.Age = 20;
