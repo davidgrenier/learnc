@@ -48,10 +48,43 @@ void die(const char *message, struct Connection *conn)
     diem(message);
 }
 
+void loadAddress(struct Connection *conn, struct Address *addr)
+{
+    int maxData = conn->db->maxData;
+
+    int rc = fread(addr->name, sizeof(char), maxData, conn->file);
+    if (rc != 1) die("Failed to load name", conn);
+
+    rc = fread(addr->email, sizeof(char), maxData, conn->file);
+    if (rc != 1) die("Failed to load email", conn);
+}
+
+void writeAddress(struct Connection *conn, struct Address *addr)
+{
+    int maxData = conn->db->maxData;
+
+    int rc = fwrite(addr->name, sizeof(char), maxData, conn->file);
+    if (rc != 1) die("Failed to write name", conn);
+
+    rc = fwrite(addr->email, sizeof(char), maxData, conn->file);
+    if (rc != 1) die("Failed to write email", conn);
+}
+
 void loadDatabase(struct Connection *conn)
 {
-    int rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
-    if (rc != 1) die("Failed to load database.", conn);
+    struct Database *db = conn->db;
+
+    int rc = fread(db, sizeof(struct Database), 1, conn->file);
+    if (rc != 1) die("Failed to load database", conn);
+    
+    rc = fread(db->rows, sizeof(struct Address), db->maxRows, conn->file);
+    if (rc != 1) die("Failed to load addresses", conn);
+
+    for (int i = 0; i < db->maxRows; i++) {
+        if (db->rows[i].set) {
+            loadAddress(conn, db->rows + i);
+        }
+    }
 }
 
 struct Connection *openDatabase(char *filename, char mode)
@@ -75,12 +108,27 @@ struct Connection *openDatabase(char *filename, char mode)
     return conn;
 }
 
+void printAddress(struct Address *addr)
+{
+    printf("%i %s %s\n", addr->id, addr->name, addr->email);
+}
+
 void writeDatabase(struct Connection *conn)
 {
+    struct Database *db = conn->db;
     rewind(conn->file);
 
-    int rc = fwrite(conn->db, sizeof(struct Database), 1, conn->file);
-    if (rc != 1) die("Failed to write database.", conn);
+    int rc = fwrite(db, sizeof(struct Database), 1, conn->file);
+    if (rc != 1) die("Failed to write database", conn);
+
+    rc = fwrite(db->rows, sizeof(struct Address), db->maxRows, conn->file);
+    if (rc != 1) die("Failed to write addresses", conn);
+
+    for (int i = 0; i < db->maxRows; i++) {
+        if (db->rows[i].set) {
+            writeAddress(conn, db->rows + i);
+        }
+    }
 
     rc = fflush(conn->file);
     if (rc == -1) die("Cannot flush database.", conn);
@@ -89,15 +137,10 @@ void writeDatabase(struct Connection *conn)
 void createDatabase(struct Connection *conn, int maxData, int maxRows)
 {
     conn->db->maxRows = maxRows;
-    conn->db->maxData = maxData;
-    conn->db->rows = malloc(maxRows * sizeof(struct Address *));
-
-    char *empty = malloc(maxData);
+    conn->db->rows = calloc(maxRows, sizeof(struct Address));
 
     for (int i = 0; i < maxRows; i++) {
-        struct Address addr = { .id = i, .set = 0, .name = empty, .email = empty};
-
-        conn->db->rows[i] = addr;
+        conn->db->rows[i].id = i;
     }
 }
 
@@ -112,29 +155,22 @@ int copyString(char *target, const char *source, int maxLength)
 
 void set(struct Connection *conn, int id, const char *name, const char *email)
 {
-    int maxData = conn->db->maxData;
-    struct Address *addr = &conn->db->rows[id];
+    struct Address *addr = conn->db->rows + id;
     
     if (addr->set) die("Already set, delete it first", conn);
 
     addr->set = 1;
 
-    int fail = copyString(addr->name, name, maxData);
+    int fail = copyString(addr->name, name, conn->db->maxData);
     if (fail) die("Name copy failed", conn);
 
-    fail = copyString(addr->email, email, maxData);
+    fail = copyString(addr->email, email, conn->db->maxData);
     if (fail) die("Email copy failed", conn);
-}
-
-void printAddress(struct Address *addr)
-{
-    printf("%i %s %s\n", addr->id, addr->name, addr->email);
 }
 
 void list(struct Connection *conn)
 {
-    int maxRows = conn->db->maxRows;
-    for (int i = 0; i < maxRows; i++) {
+    for (int i = 0; i < conn->db->maxRows; i++) {
         struct Address *addr = &conn->db->rows[i];
 
         if (addr->set) printAddress(addr);
@@ -174,9 +210,9 @@ int main(int argc, char *argv[]) {
             if (argc < 5) die("Need maxData, maxRows to create", conn);
 
             int maxData = id;
-            int maxRow = atoi(argv[4]);
+            int maxRows = atoi(argv[4]);
                 
-            createDatabase(conn, maxData, maxRow);
+            createDatabase(conn, maxData, maxRows);
             writeDatabase(conn);
             break;
 
