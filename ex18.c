@@ -31,6 +31,20 @@ int *getCopy(int *numbers, int count)
 
 int partition(int *numbers, int low, int hi, compare cmp)
 {
+    
+    int mid = (hi - low) / 2;
+
+    if (numbers[mid] > numbers[hi]) {
+        SWAP(numbers[mid], numbers[hi])
+    }
+    if (numbers[low] > numbers[hi]) {
+        SWAP(numbers[low], numbers[hi])
+    }
+    if (numbers[low] < numbers[mid]) {
+        SWAP(numbers[low], numbers[mid])
+    }
+    
+
     int pivot = numbers[low];
 
     int i = low;
@@ -73,6 +87,20 @@ int *quickSort(int *numbers, int count, compare cmp)
     int *target = getCopy(numbers, count);
 
     qSort(target, 0, count - 1, cmp);
+
+    return target;
+}
+
+int myComp(const void *p1, const void *p2)
+{
+    return *(const int*)p1 - *(const int*)p2;
+}
+
+int *stdQuickSort(int *numbers, int count, compare cmp)
+{
+    int *target = getCopy(numbers, count);
+
+    qsort(target, count, sizeof(int), myComp);
 
     return target;
 }
@@ -126,7 +154,7 @@ void testSort(int *numbers, int count, sort sort, compare cmp)
 }
 
 
-int main(int argc, char *argv[])
+void prog(int argc, char *argv[])
 {
     if (argc == 1) die("Usage: ex18 2 5 2 1 3\n");
 
@@ -149,7 +177,36 @@ int main(int argc, char *argv[])
     testSort(numbers, count, quickSort, reverseOrder);
     testSort(numbers, count, quickSort, strangeOrder);
 
+    testSort(numbers, count, stdQuickSort, sortedOrder);
+
     free(numbers);
-    
+}
+
+void speed(int pathological, sort sort)
+{
+    int count = pathological? 30000 : 500000;
+    int *numbers = malloc(count * sizeof(int));
+
+    for (int i = 0; i < count; i++) {
+        numbers[i] = (int)random();
+    }
+
+    if (pathological) {
+        int *sorted = stdQuickSort(numbers, count, sortedOrder);
+        free(numbers);
+        numbers = sorted;
+    }
+
+    int *result = sort(numbers, count, sortedOrder);
+
+    free(numbers);
+    free(result);
+}
+
+int main(int argc, char *argv[])
+{
+//    prog(argc, argv);
+    speed(0, quickSort);
+
     return 0;
 }
