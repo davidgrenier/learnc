@@ -27,11 +27,11 @@ int main()
     char *in = NULL;
 
     printf("What's your First Name? ");
-    in = fgets(you.firstName, MAX_DATA-1, stdin);
+    in = fgets(you.firstName, MAX_DATA, stdin);
     check(in != NULL, "Failed to read first name.");
 
     printf("What's your Last Name? ");
-    in = fgets(you.lastName, MAX_DATA-1, stdin);
+    in = fgets(you.lastName, MAX_DATA, stdin);
     check(in != NULL, "Failed to read last name.");
 
     printf("How old are you? ");
