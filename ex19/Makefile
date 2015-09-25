@@ -1,7 +1,9 @@
-CFLAGS=-Wall -g
+CFLAGS = -Wall -g
 
-ex19 :
-	cc $(CFLAGS) ex19.c object.o -o ex19
+OBJ = ex19.c object.o
 
-clean:
+ex19 : $(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) -o $@
+
+clean :
 	rm -f ex19 object.o

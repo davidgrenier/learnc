@@ -6,16 +6,16 @@ typedef enum {
 } Direction;
 
 typedef struct {
-    char *description;
-    int (*init)(void *self);
+    char* description;
     void (*describe)(void *self);
-    void (*destroy)(void *self);
-    void *(*move)(void *self, Direction direction);
     int (*attack)(void *self, int damage);
+    int (*init)(void *self);
+    void *(*move)(void *self, Direction direction);
+    void (*destroy)(void *self);
 } Object;
 
-void *Object_new(size_t size, Object proto, char *description);
+void *newObject(size_t size, Object proto, char *description);
 
-#define NEW(T, N) Object_new(sizeof(T), T##Proto, N)
+#define NEW(T, N) newObject(sizeof(T), T##Proto, N)
 
 #endif
