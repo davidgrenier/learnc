@@ -87,9 +87,7 @@ void *moveMap(void *self, Direction direction)
     Room *location = map->location;
     Room *next = location->proto.move(location, direction);
 
-    if (next) {
-        location = next;
-    }
+    if (next) map->location = next;
     
     return next;
 }
@@ -110,7 +108,6 @@ int initMap(void *self)
     Room *throne = NEW(Room, "The throne room");
     Room *arena = NEW(Room, "The arena, with the minotaur");
     Room *kitchen = NEW(Room, "Kitchen, you have the knife now");
-
 
     arena->badGuy = NEW(Monster, "The evil minotaur");
 
