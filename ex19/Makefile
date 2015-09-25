@@ -1,9 +1,9 @@
 CFLAGS = -Wall -g
 
-OBJ = ex19.c object.o
+DEPS = ex19.c object.o
 
 ex19 : $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o $@
+	$(CC) $(CFLAGS) $(DEPS) -o $@
 
 clean :
 	rm -f ex19 object.o
